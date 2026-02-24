@@ -23,7 +23,6 @@ class DefaultStepHandlerTest {
 
     @AfterEach
     void resetConfig() {
-        // clean up after each test
         JenkinsOpenTelemetryPluginConfiguration.get().setOmitPipelineStepSpans(false);
     }
 
