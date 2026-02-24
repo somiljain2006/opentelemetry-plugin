@@ -10,5 +10,6 @@ observabilityBackends:
 - elastic:
     kibanaBaseUrl: "https://my-deployment.es.example.com"
     name: "My Elastic"
+omitPipelineStepSpans: false
 serviceName: "my-jenkins"
 serviceNamespace: "ci"
