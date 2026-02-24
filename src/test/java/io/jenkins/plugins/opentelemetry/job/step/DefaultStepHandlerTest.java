@@ -5,31 +5,31 @@
 
 package io.jenkins.plugins.opentelemetry.job.step;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import io.jenkins.plugins.opentelemetry.JenkinsOpenTelemetryPluginConfiguration;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class DefaultStepHandlerTest {
+@WithJenkins
+class DefaultStepHandlerTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
-
-    @After
-    public void resetConfig() {
-        // avoid leaking config between tests
+    @AfterEach
+    void resetConfig() {
+        // clean up after each test
         JenkinsOpenTelemetryPluginConfiguration.get().setOmitPipelineStepSpans(false);
     }
 
     @Test
-    public void omitPipelineStepSpans_disablesStepSpanCreation() {
+    void omitPipelineStepSpans_disablesStepSpanCreation(JenkinsRule jenkins) {
+        assertNotNull(jenkins);
         JenkinsOpenTelemetryPluginConfiguration.get().setOmitPipelineStepSpans(true);
 
         DefaultStepHandler handler = new DefaultStepHandler();
@@ -40,7 +40,8 @@ public class DefaultStepHandlerTest {
     }
 
     @Test
-    public void omitPipelineStepSpans_disabled_allowsStepSpanCreation() {
+    void omitPipelineStepSpans_disabled_allowsStepSpanCreation(JenkinsRule jenkins) {
+        assertNotNull(jenkins);
         JenkinsOpenTelemetryPluginConfiguration.get().setOmitPipelineStepSpans(false);
 
         DefaultStepHandler handler = new DefaultStepHandler();
