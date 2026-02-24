@@ -7,6 +7,7 @@ package io.jenkins.plugins.opentelemetry.job.step;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import io.jenkins.plugins.opentelemetry.JenkinsOpenTelemetryPluginConfiguration;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
@@ -16,7 +17,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 public class DefaultStepHandler implements StepHandler {
     @Override
     public boolean canCreateSpanBuilder(@NonNull FlowNode flowNode, @NonNull WorkflowRun run) {
-        return true;
+        return !JenkinsOpenTelemetryPluginConfiguration.get().isOmitPipelineStepSpans();
     }
 
     @NonNull

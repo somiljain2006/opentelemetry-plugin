@@ -132,6 +132,8 @@ public class JenkinsOpenTelemetryPluginConfiguration extends GlobalConfiguration
 
     private boolean exportOtelConfigurationAsEnvironmentVariables;
 
+    private boolean omitPipelineStepSpans;
+
     private final transient ConcurrentMap<String, StepPlugin> loadedStepsPlugins = new ConcurrentHashMap<>();
 
     private String configurationProperties;
@@ -383,6 +385,15 @@ public class JenkinsOpenTelemetryPluginConfiguration extends GlobalConfiguration
     @DataBoundSetter
     public void setExporterIntervalMillis(Integer exporterIntervalMillis) {
         this.exporterIntervalMillis = exporterIntervalMillis;
+    }
+
+    public boolean isOmitPipelineStepSpans() {
+        return omitPipelineStepSpans;
+    }
+
+    @DataBoundSetter
+    public void setOmitPipelineStepSpans(boolean omitPipelineStepSpans) {
+        this.omitPipelineStepSpans = omitPipelineStepSpans;
     }
 
     public String getIgnoredSteps() {

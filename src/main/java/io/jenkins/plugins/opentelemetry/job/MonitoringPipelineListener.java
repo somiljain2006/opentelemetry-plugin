@@ -103,9 +103,15 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
                 new HashSet<>(jenkinsOpenTelemetryPluginConfiguration.getStatusUnsetCausesOfInterruption());
     }
 
+    private boolean isOmitPipelineStepSpans() {
+        JenkinsOpenTelemetryPluginConfiguration config = JenkinsOpenTelemetryPluginConfiguration.get();
+        return config.isOmitPipelineStepSpans();
+    }
+
     @Override
     public void onStartNodeStep(
             @NonNull StepStartNode stepStartNode, @Nullable String agentLabel, @NonNull WorkflowRun run) {
+        if (isOmitPipelineStepSpans()) return;
         try (Scope nodeSpanScope = setupContext(run, stepStartNode)) {
             verifyNotNull(nodeSpanScope, "%s - No span found for node %s", run, stepStartNode);
             String stepType =
@@ -171,6 +177,9 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
     @Override
     public void onAfterStartNodeStep(
             @NonNull StepStartNode stepStartNode, @Nullable String nodeLabel, @NonNull WorkflowRun run) {
+        if (isOmitPipelineStepSpans()) {
+            return;
+        }
         // end the JenkinsOtelSemanticAttributes.AGENT_ALLOCATE span
         endCurrentSpan(stepStartNode, run, null);
     }
@@ -178,6 +187,9 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
     @Override
     public void onStartStageStep(
             @NonNull StepStartNode stepStartNode, @NonNull String stageName, @NonNull WorkflowRun run) {
+        if (isOmitPipelineStepSpans()) {
+            return;
+        }
         try (Scope ignored = setupContext(run, stepStartNode)) {
             verifyNotNull(ignored, "%s - No span found for node %s", run, stepStartNode);
             String spanStageName = "Stage: " + stageName;
@@ -207,6 +219,9 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
     @Override
     public void onEndNodeStep(
             @NonNull StepEndNode node, @NonNull String nodeName, FlowNode nextNode, @NonNull WorkflowRun run) {
+        if (isOmitPipelineStepSpans()) {
+            return;
+        }
         StepStartNode nodeStartNode = node.getStartNode();
         GenericStatus nodeStatus = StatusAndTiming.computeChunkStatus2(run, null, nodeStartNode, node, nextNode);
         endCurrentSpan(node, run, nodeStatus);
@@ -215,6 +230,9 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
     @Override
     public void onEndStageStep(
             @NonNull StepEndNode node, @NonNull String stageName, FlowNode nextNode, @NonNull WorkflowRun run) {
+        if (isOmitPipelineStepSpans()) {
+            return;
+        }
         StepStartNode stageStartNode = node.getStartNode();
         GenericStatus stageStatus = StatusAndTiming.computeChunkStatus2(run, null, stageStartNode, node, nextNode);
         endCurrentSpan(node, run, stageStatus);
@@ -231,7 +249,7 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
 
     @Override
     public void onAtomicStep(@NonNull StepAtomNode node, @NonNull WorkflowRun run) {
-        if (isIgnoredStep(node.getDescriptor())) {
+        if (isOmitPipelineStepSpans() || isIgnoredStep(node.getDescriptor())) {
             LOGGER.log(
                     Level.FINE,
                     () -> run.getFullDisplayName() + " - don't create span for step '" + node.getDisplayFunctionName()
@@ -280,7 +298,7 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
 
     @Override
     public void onAfterAtomicStep(@NonNull StepAtomNode node, FlowNode nextNode, @NonNull WorkflowRun run) {
-        if (isIgnoredStep(node.getDescriptor())) {
+        if (isOmitPipelineStepSpans() || isIgnoredStep(node.getDescriptor())) {
             LOGGER.log(
                     Level.FINE,
                     () -> run.getFullDisplayName() + " - don't end span for step '" + node.getDisplayFunctionName()
@@ -359,6 +377,9 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
     @Override
     public void onStartParallelStepBranch(
             @NonNull StepStartNode stepStartNode, @NonNull String branchName, @NonNull WorkflowRun run) {
+        if (isOmitPipelineStepSpans()) {
+            return;
+        }
         try (Scope ignored = setupContext(run, stepStartNode)) {
             verifyNotNull(ignored, "%s - No span found for node %s", run, stepStartNode);
 
@@ -387,6 +408,9 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
     @Override
     public void onEndParallelStepBranch(
             @NonNull StepEndNode node, @NonNull String branchName, FlowNode nextNode, @NonNull WorkflowRun run) {
+        if (isOmitPipelineStepSpans()) {
+            return;
+        }
         StepStartNode parallelStartNode = node.getStartNode();
         GenericStatus parallelStatus =
                 StatusAndTiming.computeChunkStatus2(run, null, parallelStartNode, node, nextNode);
@@ -457,6 +481,9 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
 
     @Override
     public void onStartWithNewSpanStep(@NonNull StepStartNode stepStartNode, @NonNull WorkflowRun run) {
+        if (isOmitPipelineStepSpans()) {
+            return;
+        }
         try (Scope ignored = setupContext(run, stepStartNode)) {
             verifyNotNull(ignored, "%s - No span found for node %s", run, stepStartNode);
 
@@ -522,6 +549,7 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
 
     @Override
     public void onEndWithNewSpanStep(@NonNull StepEndNode node, FlowNode nextNode, @NonNull WorkflowRun run) {
+        if (isOmitPipelineStepSpans()) return;
         StepStartNode nodeStartNode = node.getStartNode();
         GenericStatus nodeStatus = StatusAndTiming.computeChunkStatus2(run, null, nodeStartNode, node, nextNode);
         endCurrentSpan(node, run, nodeStatus);
@@ -529,6 +557,9 @@ public class MonitoringPipelineListener extends AbstractPipelineListener
 
     @Override
     public void notifyOfNewStep(@NonNull Step step, @NonNull StepContext context) {
+        if (isOmitPipelineStepSpans()) {
+            return;
+        }
         try {
             WorkflowRun run = context.get(WorkflowRun.class);
             FlowNode node = context.get(FlowNode.class);

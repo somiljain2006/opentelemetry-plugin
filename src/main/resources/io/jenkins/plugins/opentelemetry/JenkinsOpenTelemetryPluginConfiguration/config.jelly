@@ -39,6 +39,9 @@
                 <f:entry field="ignoredSteps" title="Steps to be ignored (comma-separated)" description="e.g. 'dir,echo,println'">
                     <f:textbox />
                 </f:entry>
+                <f:entry title="Omit pipeline step spans" field="omitPipelineStepSpans" description="Only send the root job trace, omitting individual pipeline steps to save overhead.">
+                    <f:checkbox />
+                </f:entry>
                 <f:entry title="Configuration properties" field="configurationProperties" description="Additional OpenTelemetry SDK configuration properties.">
                     <f:textarea />
                 </f:entry>
