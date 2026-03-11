@@ -258,33 +258,46 @@ public class ElasticsearchBuildLogsLineIterator implements LogLineIterator<Long>
             fieldRunNumber = ElasticsearchFields.LEGACY_FIELD_CI_PIPELINE_RUN_NUMBER;
             fieldFlowNodeId = ElasticsearchFields.LEGACY_FIELD_JENKINS_STEP_ID;
         }
+        esSearchSpan.setAttribute("query.match.traceId", traceId);
+        esSearchSpan.setAttribute("query.match.jobFullName", jobFullName);
+        esSearchSpan.setAttribute("query.match.runNumber", (long) runNumber);
+
         BoolQuery.Builder queryBuilder = QueryBuilders.bool()
-                .must(
-                        QueryBuilders.match()
-                                .field(fieldTraceID)
-                                .query(FieldValue.of(traceId))
-                                .build()
-                                ._toQuery(),
-                        QueryBuilders.match()
-                                .field(fieldJobFullName)
-                                .query(FieldValue.of(jobFullName))
-                                .build()
-                                ._toQuery(),
-                        QueryBuilders.match()
-                                .field(fieldRunNumber)
-                                .query(FieldValue.of(runNumber))
-                                .build()
-                                ._toQuery());
+                .must(QueryBuilders.term()
+                        .field(fieldTraceID)
+                        .value(FieldValue.of(traceId))
+                        .build()
+                        ._toQuery());
+
+        queryBuilder.mustNot(QueryBuilders.bool()
+                .must(QueryBuilders.exists().field(fieldJobFullName).build()._toQuery())
+                .mustNot(QueryBuilders.term()
+                        .field(fieldJobFullName)
+                        .value(FieldValue.of(jobFullName))
+                        .build()
+                        ._toQuery())
+                .build()
+                ._toQuery());
+
+        queryBuilder.mustNot(QueryBuilders.bool()
+                .must(QueryBuilders.exists().field(fieldRunNumber).build()._toQuery())
+                .mustNot(QueryBuilders.term()
+                        .field(fieldRunNumber)
+                        .value(FieldValue.of(runNumber))
+                        .build()
+                        ._toQuery())
+                .build()
+                ._toQuery());
         if (flowNodeId != null) {
             esSearchSpan.setAttribute("query.match.flowNodeId", flowNodeId);
-            queryBuilder.must(QueryBuilders.match()
+            queryBuilder.must(QueryBuilders.term()
                     .field(fieldFlowNodeId)
-                    .query(FieldValue.of(flowNodeId))
+                    .value(FieldValue.of(flowNodeId))
                     .build()
                     ._toQuery());
         }
-        Query query = queryBuilder.build()._toQuery();
-        return query;
+
+        return queryBuilder.build()._toQuery();
     }
 
     static class ElasticsearchHitToFormattedLogLine implements Function<Hit<ObjectNode>, LogLine<Long>> {

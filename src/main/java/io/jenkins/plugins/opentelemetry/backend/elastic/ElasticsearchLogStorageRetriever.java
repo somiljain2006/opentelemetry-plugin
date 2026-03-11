@@ -63,6 +63,7 @@ import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.util.TimeValue;
@@ -155,7 +156,16 @@ public class ElasticsearchLogStorageRetriever implements LogStorageRetriever, Cl
         }
 
         HttpAuthHeaderFactory httpAuthHeaderFactory = new HttpAuthHeaderFactory(elasticsearchCredentialsId);
-        Header[] headers = {httpAuthHeaderFactory.createAuthHeader()};
+        List<Header> headerList = new ArrayList<>();
+        Header authHeader = httpAuthHeaderFactory.createAuthHeader();
+        if (authHeader != null) {
+            headerList.add(authHeader);
+        }
+
+        headerList.add(new BasicHeader("Content-Type", "application/vnd.elasticsearch+json;compatible-with=8"));
+        headerList.add(new BasicHeader("Accept", "application/vnd.elasticsearch+json;compatible-with=8"));
+
+        Header[] headers = headerList.toArray(new Header[0]);
         this.restClient = Rest5Client.builder(URI.create(elasticsearchUrl))
                 .setHttpClient(httpclient)
                 .setDefaultHeaders(headers)
