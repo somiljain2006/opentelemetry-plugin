@@ -280,7 +280,7 @@ public class ElasticsearchBuildLogsLineIterator implements LogLineIterator<Long>
         final String stringRunNumber = String.valueOf(runNumber);
         queryBuilder.mustNot(QueryBuilders.bool()
                 .must(m -> m.exists(e -> e.field(finalFieldRunNumber)))
-                .mustNot(m -> m.term(t -> t.field(finalFieldRunNumber).value(FieldValue.of(stringRunNumber))))
+                .mustNot(m -> m.term(t -> t.field(finalFieldRunNumber).value(FieldValue.of(runNumber))))
                 .build()
                 ._toQuery());
         if (flowNodeId != null) {
