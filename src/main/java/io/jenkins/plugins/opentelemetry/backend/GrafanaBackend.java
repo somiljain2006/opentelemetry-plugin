@@ -58,6 +58,7 @@ public class GrafanaBackend extends ObservabilityBackend {
 
     private String grafanaMetricsDashboard;
     private String tempoDataSourceIdentifier = DEFAULT_TEMPO_DATA_SOURCE_IDENTIFIER;
+    private String tempoDataSourceUid;
 
     private String grafanaOrgId = DEFAULT_GRAFANA_ORG_ID;
 
@@ -71,14 +72,15 @@ public class GrafanaBackend extends ObservabilityBackend {
     @Nullable
     @Override
     public String getTraceVisualisationUrlTemplate() {
-        return "${" + TemplateBindings.GRAFANA_BASE_URL + "}" + "/explore?orgId="
+        return "${" + TemplateBindings.GRAFANA_BASE_URL + "}" + "/explore?schemaVersion=1&orgId="
                 + "${"
-                + TemplateBindings.GRAFANA_ORG_ID + "}" + "&left=%7B%22datasource%22:%22"
+                + TemplateBindings.GRAFANA_ORG_ID + "}" + "&panes=%7B%22pane1%22:%7B%22datasource%22:%22"
                 + "${"
-                + TemplateBindings.GRAFANA_TEMPO_DATASOURCE_IDENTIFIER + "}"
+                + TemplateBindings.GRAFANA_TEMPO_DATASOURCE_UID + "}"
                 + "%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22datasource%22:%7B%22type%22:%22tempo%22,%22uid%22:%22"
                 + "${"
-                + TemplateBindings.GRAFANA_TEMPO_DATASOURCE_IDENTIFIER + "}" + "%22%7D,%22queryType%22:%22${"
+                + TemplateBindings.GRAFANA_TEMPO_DATASOURCE_UID + "}"
+                + "%22%7D,%22queryType%22:%22${"
                 + TemplateBindings.GRAFANA_TEMPO_QUERY_TYPE + "}%22,%22query%22:%22" + "${traceId}"
                 + "%22%7D%5D,%22range%22:%7B%22from%22:%22"
                 + "${"
@@ -88,7 +90,7 @@ public class GrafanaBackend extends ObservabilityBackend {
                 + "${"
                 + TemplateBindings.START_TIME
                 + ".plusSeconds(600).atZone(java.util.TimeZone.getDefault().toZoneId()).toInstant().toEpochMilli()}"
-                + "%22%7D%7D";
+                + "%22%7D%7D%7D";
     }
 
     /**
@@ -126,12 +128,14 @@ public class GrafanaBackend extends ObservabilityBackend {
         return Objects.equals(grafanaOrgId, that.grafanaOrgId)
                 && Objects.equals(grafanaBaseUrl, that.grafanaBaseUrl)
                 && Objects.equals(tempoDataSourceIdentifier, that.tempoDataSourceIdentifier)
+                && Objects.equals(tempoDataSourceUid, that.tempoDataSourceUid)
                 && Objects.equals(tempoQueryType, that.tempoQueryType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(grafanaBaseUrl, tempoDataSourceIdentifier, grafanaOrgId, tempoQueryType);
+        return Objects.hash(
+                grafanaBaseUrl, tempoDataSourceIdentifier, tempoDataSourceUid, grafanaOrgId, tempoQueryType);
     }
 
     @Override
@@ -144,12 +148,22 @@ public class GrafanaBackend extends ObservabilityBackend {
     @Override
     public Map<String, Object> getBindings() {
         Map<String, Object> bindings = Map.of(
-                TemplateBindings.BACKEND_NAME, getName(),
-                TemplateBindings.BACKEND_24_24_ICON_URL, "/plugin/opentelemetry/images/24x24/grafana.png",
-                TemplateBindings.GRAFANA_BASE_URL, this.getGrafanaBaseUrl(),
-                TemplateBindings.GRAFANA_ORG_ID, String.valueOf(this.getGrafanaOrgId()),
-                TemplateBindings.GRAFANA_TEMPO_DATASOURCE_IDENTIFIER, this.getTempoDataSourceIdentifier(),
-                TemplateBindings.GRAFANA_TEMPO_QUERY_TYPE, this.getTempoQueryType());
+                TemplateBindings.BACKEND_NAME,
+                getName(),
+                TemplateBindings.BACKEND_24_24_ICON_URL,
+                "/plugin/opentelemetry/images/24x24/grafana.png",
+                TemplateBindings.GRAFANA_BASE_URL,
+                this.getGrafanaBaseUrl(),
+                TemplateBindings.GRAFANA_ORG_ID,
+                String.valueOf(this.getGrafanaOrgId()),
+                TemplateBindings.GRAFANA_TEMPO_DATASOURCE_IDENTIFIER,
+                this.getTempoDataSourceIdentifier(),
+                TemplateBindings.GRAFANA_TEMPO_DATASOURCE_UID,
+                StringUtils.isNotBlank(this.getTempoDataSourceUid())
+                        ? this.getTempoDataSourceUid()
+                        : this.getTempoDataSourceIdentifier(),
+                TemplateBindings.GRAFANA_TEMPO_QUERY_TYPE,
+                this.getTempoQueryType());
 
         if (grafanaLogsBackend instanceof TemplateBindingsProvider) {
             Map<String, Object> logsBackendBindings = ((TemplateBindingsProvider) grafanaLogsBackend).getBindings();
@@ -186,6 +200,15 @@ public class GrafanaBackend extends ObservabilityBackend {
     @DataBoundSetter
     public void setTempoDataSourceIdentifier(String tempoDataSourceIdentifier) {
         this.tempoDataSourceIdentifier = tempoDataSourceIdentifier;
+    }
+
+    public String getTempoDataSourceUid() {
+        return tempoDataSourceUid;
+    }
+
+    @DataBoundSetter
+    public void setTempoDataSourceUid(String tempoDataSourceUid) {
+        this.tempoDataSourceUid = tempoDataSourceUid;
     }
 
     @DataBoundSetter
@@ -280,6 +303,7 @@ public class GrafanaBackend extends ObservabilityBackend {
     public interface TemplateBindings extends ObservabilityBackend.TemplateBindings {
         String GRAFANA_BASE_URL = "grafanaBaseUrl";
         String GRAFANA_TEMPO_DATASOURCE_IDENTIFIER = "grafanaTempoDatasourceIdentifier";
+        String GRAFANA_TEMPO_DATASOURCE_UID = "grafanaTempoDatasourceUid";
         String GRAFANA_LOKI_DATASOURCE_IDENTIFIER = "grafanaLokiDatasourceIdentifier";
         String GRAFANA_ORG_ID = "grafanaOrgId";
         String GRAFANA_TEMPO_QUERY_TYPE = "grafanaTempoQueryType";
