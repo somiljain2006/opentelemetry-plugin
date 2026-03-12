@@ -269,23 +269,18 @@ public class ElasticsearchBuildLogsLineIterator implements LogLineIterator<Long>
                         .build()
                         ._toQuery());
 
+        final String finalFieldJobFullName = fieldJobFullName;
         queryBuilder.mustNot(QueryBuilders.bool()
-                .must(QueryBuilders.exists().field(fieldJobFullName).build()._toQuery())
-                .mustNot(QueryBuilders.term()
-                        .field(fieldJobFullName)
-                        .value(FieldValue.of(jobFullName))
-                        .build()
-                        ._toQuery())
+                .must(m -> m.exists(e -> e.field(finalFieldJobFullName)))
+                .mustNot(m -> m.term(t -> t.field(finalFieldJobFullName).value(FieldValue.of(jobFullName))))
                 .build()
                 ._toQuery());
 
+        final String finalFieldRunNumber = fieldRunNumber;
+        final String stringRunNumber = String.valueOf(runNumber);
         queryBuilder.mustNot(QueryBuilders.bool()
-                .must(QueryBuilders.exists().field(fieldRunNumber).build()._toQuery())
-                .mustNot(QueryBuilders.term()
-                        .field(fieldRunNumber)
-                        .value(FieldValue.of(runNumber))
-                        .build()
-                        ._toQuery())
+                .must(m -> m.exists(e -> e.field(finalFieldRunNumber)))
+                .mustNot(m -> m.term(t -> t.field(finalFieldRunNumber).value(FieldValue.of(stringRunNumber))))
                 .build()
                 ._toQuery());
         if (flowNodeId != null) {
