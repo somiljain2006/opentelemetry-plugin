@@ -5,6 +5,7 @@
 
 package io.jenkins.plugins.opentelemetry.backend;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
@@ -70,5 +71,25 @@ public class GrafanaBackendTest {
                 actualUrl.contains("grafanacloud-traces"),
                 "URL must fall back to the tempoDataSourceIdentifier when UID is missing");
         assertTrue(actualUrl.contains("f464e1f32444443d3fc00fdb19e5c124"), "URL must contain the exact traceId");
+    }
+
+    @Test
+    public void testEqualsAndHashCode() {
+        GrafanaBackend backend1 = new GrafanaBackend();
+        backend1.setGrafanaBaseUrl("http://grafana");
+        backend1.setGrafanaOrgId("1");
+        backend1.setTempoDataSourceIdentifier("tempo");
+        backend1.setTempoDataSourceUid("tempo-uid");
+        backend1.setTempoQueryType("traceql");
+
+        GrafanaBackend backend2 = new GrafanaBackend();
+        backend2.setGrafanaBaseUrl("http://grafana");
+        backend2.setGrafanaOrgId("1");
+        backend2.setTempoDataSourceIdentifier("tempo");
+        backend2.setTempoDataSourceUid("tempo-uid");
+        backend2.setTempoQueryType("traceql");
+
+        assertEquals(backend1, backend2);
+        assertEquals(backend1.hashCode(), backend2.hashCode());
     }
 }
