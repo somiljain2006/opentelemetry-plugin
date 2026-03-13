@@ -162,8 +162,8 @@ public class ElasticsearchLogStorageRetriever implements LogStorageRetriever, Cl
             headerList.add(authHeader);
         }
 
-        headerList.add(new BasicHeader("Content-Type", "application/vnd.elasticsearch+json;compatible-with=8"));
-        headerList.add(new BasicHeader("Accept", "application/vnd.elasticsearch+json;compatible-with=8"));
+        headerList.add(new BasicHeader("Content-Type", "application/json"));
+        headerList.add(new BasicHeader("Accept", "application/json"));
 
         Header[] headers = headerList.toArray(new Header[0]);
         this.restClient = Rest5Client.builder(URI.create(elasticsearchUrl))
