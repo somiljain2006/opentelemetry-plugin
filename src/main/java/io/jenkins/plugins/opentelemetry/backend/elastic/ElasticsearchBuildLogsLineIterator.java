@@ -277,7 +277,6 @@ public class ElasticsearchBuildLogsLineIterator implements LogLineIterator<Long>
                 ._toQuery());
 
         final String finalFieldRunNumber = fieldRunNumber;
-        final String stringRunNumber = String.valueOf(runNumber);
         queryBuilder.mustNot(QueryBuilders.bool()
                 .must(m -> m.exists(e -> e.field(finalFieldRunNumber)))
                 .mustNot(m -> m.term(t -> t.field(finalFieldRunNumber).value(FieldValue.of(runNumber))))
