@@ -72,15 +72,13 @@ public class GrafanaBackend extends ObservabilityBackend {
     @DataBoundConstructor
     public GrafanaBackend() {}
 
-    @SuppressWarnings("unused")
-    protected Object readResolve() {
+    protected void readResolve() {
         if (tempoDataSourceIdentifier != null) {
             if (tempoDataSourceUid == null || tempoDataSourceUid.equals(DEFAULT_TEMPO_DATA_SOURCE_IDENTIFIER)) {
                 this.tempoDataSourceUid = tempoDataSourceIdentifier;
             }
             this.tempoDataSourceIdentifier = null;
         }
-        return this;
     }
 
     @Nullable
@@ -283,7 +281,6 @@ public class GrafanaBackend extends ObservabilityBackend {
             return DEFAULT_TEMPO_DATA_SOURCE_IDENTIFIER;
         }
 
-        @SuppressWarnings("unused")
         public String getDefaultTempoDataSourceUid() {
             return DEFAULT_TEMPO_DATA_SOURCE_IDENTIFIER;
         }
