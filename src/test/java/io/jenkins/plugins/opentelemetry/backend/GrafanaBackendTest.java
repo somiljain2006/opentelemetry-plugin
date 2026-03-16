@@ -118,10 +118,7 @@ public class GrafanaBackendTest {
     public void testDescriptorDefaultTempoDataSourceUid() {
         GrafanaBackend.DescriptorImpl descriptor = new GrafanaBackend.DescriptorImpl();
 
-        assertEquals(
-            "grafanacloud-traces",
-            descriptor.getDefaultTempoDataSourceUid()
-        );
+        assertEquals("grafanacloud-traces", descriptor.getDefaultTempoDataSourceUid());
     }
 
     @Test
