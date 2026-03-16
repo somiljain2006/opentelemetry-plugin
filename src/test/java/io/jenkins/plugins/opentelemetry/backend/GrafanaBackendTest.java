@@ -22,7 +22,6 @@ public class GrafanaBackendTest {
         GrafanaBackend grafanaBackend = new GrafanaBackend();
         grafanaBackend.setGrafanaBaseUrl("https://cleclerc.grafana.net");
         grafanaBackend.setGrafanaOrgId("1");
-        grafanaBackend.setTempoDataSourceIdentifier("grafanacloud-traces");
         grafanaBackend.setTempoDataSourceUid("my-awesome-custom-uid");
         grafanaBackend.setTempoQueryType("traceql");
 
@@ -46,6 +45,7 @@ public class GrafanaBackendTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testTraceUrlFallbackToIdentifier() {
         GrafanaBackend grafanaBackend = new GrafanaBackend();
         grafanaBackend.setGrafanaBaseUrl("https://cleclerc.grafana.net");
@@ -78,14 +78,12 @@ public class GrafanaBackendTest {
         GrafanaBackend backend1 = new GrafanaBackend();
         backend1.setGrafanaBaseUrl("http://grafana");
         backend1.setGrafanaOrgId("1");
-        backend1.setTempoDataSourceIdentifier("tempo");
         backend1.setTempoDataSourceUid("tempo-uid");
         backend1.setTempoQueryType("traceql");
 
         GrafanaBackend backend2 = new GrafanaBackend();
         backend2.setGrafanaBaseUrl("http://grafana");
         backend2.setGrafanaOrgId("1");
-        backend2.setTempoDataSourceIdentifier("tempo");
         backend2.setTempoDataSourceUid("tempo-uid");
         backend2.setTempoQueryType("traceql");
 
