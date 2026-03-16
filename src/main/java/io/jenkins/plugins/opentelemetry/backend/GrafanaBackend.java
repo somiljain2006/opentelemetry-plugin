@@ -72,6 +72,7 @@ public class GrafanaBackend extends ObservabilityBackend {
     @DataBoundConstructor
     public GrafanaBackend() {}
 
+    @SuppressWarnings("unused")
     protected Object readResolve() {
         if (tempoDataSourceIdentifier != null) {
             if (tempoDataSourceUid == null || tempoDataSourceUid.equals(DEFAULT_TEMPO_DATA_SOURCE_IDENTIFIER)) {

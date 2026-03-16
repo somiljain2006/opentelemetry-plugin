@@ -90,4 +90,46 @@ public class GrafanaBackendTest {
         assertEquals(backend1, backend2);
         assertEquals(backend1.hashCode(), backend2.hashCode());
     }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testReadResolveMigratesIdentifierToUid() {
+        GrafanaBackend backend = new GrafanaBackend();
+
+        backend.setTempoDataSourceIdentifier("old-datasource-id");
+        backend.readResolve();
+
+        assertEquals("old-datasource-id", backend.getTempoDataSourceUid());
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testReadResolveDoesNotOverrideExistingUid() {
+        GrafanaBackend backend = new GrafanaBackend();
+
+        backend.setTempoDataSourceIdentifier("old-id");
+        backend.setTempoDataSourceUid("new-uid");
+        backend.readResolve();
+
+        assertEquals("new-uid", backend.getTempoDataSourceUid());
+    }
+
+    @Test
+    public void testDescriptorDefaultTempoDataSourceUid() {
+        GrafanaBackend.DescriptorImpl descriptor = new GrafanaBackend.DescriptorImpl();
+
+        assertEquals(
+            "grafanacloud-traces",
+            descriptor.getDefaultTempoDataSourceUid()
+        );
+    }
+
+    @Test
+    public void testDescriptorDefaults() {
+        GrafanaBackend.DescriptorImpl descriptor = new GrafanaBackend.DescriptorImpl();
+
+        assertEquals("grafanacloud-traces", descriptor.getDefaultTempoDataSourceUid());
+        assertEquals("1", descriptor.getDefaultGrafanaOrgId());
+        assertEquals("traceql", descriptor.getDefaultTempoQueryType());
+    }
 }
